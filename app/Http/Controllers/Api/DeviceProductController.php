@@ -142,6 +142,67 @@ class DeviceProductController extends Controller
     }
 
     /**
+     * Lưu vị trí lần đầu cho sản phẩm theo số serial
+     */
+    public function saveLocationBySerial(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'product_serial' => 'required|string|max:50',
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'accuracy' => 'nullable|numeric|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dữ liệu vị trí không hợp lệ',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $productSerial = strtoupper(trim($request->input('product_serial')));
+        $deviceProduct = DeviceProduct::where('product_serial', $productSerial)->first();
+
+        if (!$deviceProduct) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy sản phẩm với số serial này',
+            ], 404);
+        }
+
+        $updated = DeviceProduct::where('id', $deviceProduct->id)
+            ->whereNull('latitude')
+            ->whereNull('longitude')
+            ->update([
+                'latitude' => $request->input('latitude'),
+                'longitude' => $request->input('longitude'),
+                'location_accuracy' => $request->input('accuracy'),
+                'location_captured_at' => Carbon::now(),
+            ]);
+
+        $deviceProduct->refresh();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'product_serial' => $deviceProduct->product_serial,
+                'latitude' => $deviceProduct->latitude,
+                'longitude' => $deviceProduct->longitude,
+                'location_accuracy' => $deviceProduct->location_accuracy,
+                'location_captured_at' => $deviceProduct->location_captured_at
+                    ? $deviceProduct->location_captured_at->format('Y-m-d H:i:s')
+                    : null,
+                'has_location' => !is_null($deviceProduct->latitude)
+                    && !is_null($deviceProduct->longitude),
+            ],
+            'message' => $updated
+                ? 'Vị trí sản phẩm đã được lưu'
+                : 'Vị trí sản phẩm đã được lưu trước đó',
+        ]);
+    }
+
+    /**
      * Lưu vị trí thiết bị lần đầu (không ghi đè nếu đã có)
      */
     public function saveLocation(Request $request)

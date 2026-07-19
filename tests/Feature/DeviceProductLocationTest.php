@@ -226,4 +226,63 @@ class DeviceProductLocationTest extends TestCase
                 'message' => 'Không tìm thấy sản phẩm với số serial này',
             ]);
     }
+
+    public function test_location_can_be_saved_for_old_product_by_serial()
+    {
+        $this->createDeviceProduct();
+
+        $response = $this->postJson('/api/device-product/save-location-by-serial', [
+            'product_serial' => 'sn-testserial01',
+            'latitude' => 10.762622,
+            'longitude' => 106.660172,
+            'accuracy' => 12.5,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'Vị trí sản phẩm đã được lưu',
+                'data' => [
+                    'product_serial' => 'SN-TESTSERIAL01',
+                    'latitude' => 10.762622,
+                    'longitude' => 106.660172,
+                    'location_accuracy' => 12.5,
+                    'has_location' => true,
+                ],
+            ]);
+
+        $this->assertDatabaseHas('device_products', [
+            'product_serial' => 'SN-TESTSERIAL01',
+            'latitude' => 10.762622,
+            'longitude' => 106.660172,
+        ]);
+    }
+
+    public function test_location_saved_by_serial_is_not_overwritten()
+    {
+        $this->createDeviceProduct([
+            'latitude' => 10.111111,
+            'longitude' => 106.222222,
+            'location_accuracy' => 10,
+            'location_captured_at' => Carbon::now()->subDay(),
+        ]);
+
+        $response = $this->postJson('/api/device-product/save-location-by-serial', [
+            'product_serial' => 'SN-TESTSERIAL01',
+            'latitude' => 21.028511,
+            'longitude' => 105.804817,
+            'accuracy' => 99,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'Vị trí sản phẩm đã được lưu trước đó',
+                'data' => [
+                    'latitude' => 10.111111,
+                    'longitude' => 106.222222,
+                    'has_location' => true,
+                ],
+            ]);
+    }
 }

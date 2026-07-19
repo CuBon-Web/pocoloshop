@@ -376,6 +376,82 @@
             return result.data;
         }
 
+        async function saveLocationBySerial(productSerial, latitude, longitude, accuracy) {
+            const response = await fetch(API_BASE_URL + '/save-location-by-serial', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    product_serial: productSerial,
+                    latitude: latitude,
+                    longitude: longitude,
+                    accuracy: accuracy
+                })
+            });
+
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                throw new Error((result && result.message) || 'Không thể lưu vị trí sản phẩm');
+            }
+
+            return result.data;
+        }
+
+        function requestAndSaveLocationBySerial(productSerial) {
+            return new Promise(function (resolve, reject) {
+                if (!navigator.geolocation) {
+                    reject(new Error('Trình duyệt không hỗ trợ định vị.'));
+                    return;
+                }
+
+                const isSecure = window.isSecureContext
+                    || location.protocol === 'https:'
+                    || location.hostname === 'localhost'
+                    || location.hostname === '127.0.0.1';
+
+                if (!isSecure) {
+                    reject(new Error('Định vị chỉ hoạt động trên HTTPS hoặc localhost.'));
+                    return;
+                }
+
+                setLocationStatus(
+                    'Sản phẩm ' + productSerial + ' chưa có vị trí. Đang yêu cầu GPS để cập nhật...',
+                    null
+                );
+
+                navigator.geolocation.getCurrentPosition(async function (position) {
+                    try {
+                        const data = await saveLocationBySerial(
+                            productSerial,
+                            position.coords.latitude,
+                            position.coords.longitude,
+                            position.coords.accuracy
+                        );
+                        resolve(data);
+                    } catch (error) {
+                        reject(error);
+                    }
+                }, function (error) {
+                    let message = 'Không thể lấy vị trí thiết bị.';
+                    if (error.code === error.PERMISSION_DENIED) {
+                        message = 'Bạn đã từ chối quyền định vị. Hãy bật quyền GPS rồi tìm lại serial.';
+                    } else if (error.code === error.POSITION_UNAVAILABLE) {
+                        message = 'Không lấy được tín hiệu vị trí. Vui lòng thử lại.';
+                    } else if (error.code === error.TIMEOUT) {
+                        message = 'Hết thời gian chờ lấy vị trí. Vui lòng thử lại.';
+                    }
+                    reject(new Error(message));
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 0
+                });
+            });
+        }
+
         async function searchLocationBySerial() {
             const inputEl = document.getElementById('location-serial-input');
             const buttonEl = document.getElementById('location-serial-search');
@@ -409,7 +485,19 @@
                 }
 
                 if (!result.data.has_location) {
-                    setLocationStatus('Sản phẩm ' + result.data.product_serial + ' chưa lưu vị trí.', 'error');
+                    const locationData = await requestAndSaveLocationBySerial(
+                        result.data.product_serial
+                    );
+                    showLocationOnMap(
+                        locationData.latitude,
+                        locationData.longitude,
+                        locationData.location_accuracy
+                    );
+                    setLocationStatus(
+                        'Đã tự động cập nhật vị trí cho sản phẩm '
+                            + locationData.product_serial + '.',
+                        'success'
+                    );
                     return;
                 }
 

@@ -23,6 +23,7 @@ Route::group(['namespace'=>'Api','middleware' => 'api'],function(){
 	Route::post('device-product/get-or-create','DeviceProductController@getOrCreate');
 	Route::post('device-product/get','DeviceProductController@getByDeviceId');
 	Route::post('device-product/location-by-serial','DeviceProductController@getLocationBySerial');
+	Route::post('device-product/save-location-by-serial','DeviceProductController@saveLocationBySerial');
 	Route::post('device-product/location','DeviceProductController@saveLocation');
 });
 Route::group(['namespace'=>'Api','middleware'=>'auth:api'],function(){
