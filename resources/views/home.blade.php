@@ -615,7 +615,7 @@
                        <span class="tag"> <i class="icofont-calendar"></i> Thời gian Hết Hạn: <b id="device-product-warranty-end"></b></span>
                     </div>
                     <br>
-                    <a href="https://www.tiktok.com/@pocoloshop" class="btn btn-xl btn-outline-one icon-space-left btn-tiktok-highlight">Mua Thêm <i class="icofont-cart"></i></a>
+                    <a href="https://vt.tiktok.com/ZS9rRhDCsEHVA-Svy8R" class="btn btn-xl btn-outline-one icon-space-left btn-tiktok-highlight">Mua Thêm <i class="icofont-cart"></i></a>
                     <a href="https://www.tiktok.com/@pocoloshop" class="btn btn-xl btn-outline-one icon-space-left">Liện Hệ <i class="icofont-phone"></i></a>
                 </div>
                </div>
