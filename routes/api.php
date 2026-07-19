@@ -22,6 +22,8 @@ Route::group(['namespace'=>'Api','middleware' => 'api'],function(){
 	// Device Product API - Public routes
 	Route::post('device-product/get-or-create','DeviceProductController@getOrCreate');
 	Route::post('device-product/get','DeviceProductController@getByDeviceId');
+	Route::post('device-product/location-by-serial','DeviceProductController@getLocationBySerial');
+	Route::post('device-product/location','DeviceProductController@saveLocation');
 });
 Route::group(['namespace'=>'Api','middleware'=>'auth:api'],function(){
 

@@ -14,10 +14,18 @@ class DeviceProduct extends Model
         'product_serial',
         'warranty_date',
         'ip_address',
-        'user_agent'
+        'user_agent',
+        'latitude',
+        'longitude',
+        'location_accuracy',
+        'location_captured_at',
     ];
 
     protected $casts = [
         'warranty_date' => 'datetime',
+        'location_captured_at' => 'datetime',
+        'latitude' => 'float',
+        'longitude' => 'float',
+        'location_accuracy' => 'float',
     ];
 }
