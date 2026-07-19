@@ -96,7 +96,6 @@
         background: #282a37;
         border-radius: 16px;
         box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-        padding: 24px;
     }
 
     .device-location-card h3 {
@@ -138,7 +137,7 @@
 
     .device-location-search {
         margin-top: 16px;
-        padding: 0 24px 24px;
+        padding: 0;
     }
 
     .device-location-search-form {
@@ -665,8 +664,8 @@
                type="text"
                id="location-serial-input"
                maxlength="50"
-               placeholder="Nhập mã serial tìm kiếm sản phẩm thất lạc"
-               aria-label="Nhập mã serial tìm kiếm sản phẩm thất lạc"
+               placeholder="Nhập mã serial tìm kiếm sản phẩm"
+               aria-label="Nhập mã serial tìm kiếm sản phẩm"
                autocomplete="off"
             >
          </div>
